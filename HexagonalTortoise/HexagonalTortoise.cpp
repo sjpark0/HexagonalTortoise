@@ -1,4 +1,4 @@
-﻿// HexagonalTortoise.cpp : 이 파일에는 'main' 함수가 포함됩니다. 거기서 프로그램 실행이 시작되고 종료됩니다.
+// HexagonalTortoise.cpp : 이 파일에는 'main' 함수가 포함됩니다. 거기서 프로그램 실행이 시작되고 종료됩니다.
 //
 
 #include <iostream>
@@ -24,9 +24,15 @@ int main()
 	}
 	hexaNew.PrintFullHexa();*/
 
+    /*HexaGonPopulation pop(100, 3);
+    printf("%f, %d\n", pop.GetFitness(), pop.CheckValid());
+        
+    pop.FullCrossover(10);
+    printf("%f, %d\n", pop.GetFitness(), pop.CheckValid());*/
+    
 	HexaGonPopulation pop(100, 3);
 	for (int i = 0; i < 1000000; i++) {
-		printf("%d : %f\n", i, pop.GetFitness());
+		printf("%d : %f, %d\n", i, pop.GetFitness(), pop.CheckValid());
 		pop.FullCrossover(10);
 	}
 	pop.PrintFittest();

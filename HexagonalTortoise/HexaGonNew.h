@@ -8,6 +8,7 @@ private:
 	int m_row;
 	float m_fitness;
 	int* m_sum;
+	bool* m_pValid;
 	void MakeHexa(int row);
 	void ComputeFitness();
 	void ComputeSum();

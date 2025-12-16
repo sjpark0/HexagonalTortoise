@@ -11,6 +11,7 @@ HexaGonNew::HexaGonNew()
 	m_pValue = NULL;
 	m_pHexa = NULL;
 	m_sum = NULL;
+	m_pValid = NULL;
 }
 HexaGonNew::HexaGonNew(int row)
 {
@@ -32,6 +33,10 @@ HexaGonNew::~HexaGonNew()
 	if (m_sum) {
 		delete[]m_sum;
 	}
+	if (m_pValid) {
+		delete[]m_pValid;
+		m_pValid = NULL;
+	}
 }
 void HexaGonNew::MakeHexa(int row)
 {
@@ -41,6 +46,7 @@ void HexaGonNew::MakeHexa(int row)
 	m_row = row;
 	m_num = 2 * row * (row + 2);
 	m_pValue = new int[m_num];
+	m_pValid = new bool[m_num + 1];
 	m_pHexa = new int** [m_row * m_row];
 	m_sum = new int[m_row * m_row];
 	for (int i = 0; i < m_row; i++) {
@@ -249,13 +255,14 @@ int HexaGonNew::GetNumValue()
 }
 bool HexaGonNew::CheckValid()
 {
-	bool *valid = new bool[m_num + 1];
 	for (int i = 0; i < m_num + 1; i++) {
-		valid[i] = false;
+		m_pValid[i] = false;
 	}
 	for (int i = 0; i < m_num; i++) {
-		if (valid[m_pValue[i]]) return false;
-		valid[m_pValue[i]] = true;
+		if (m_pValid[m_pValue[i]]) {
+			return false;
+		}
+		m_pValid[m_pValue[i]] = true;
 	}
 	return true;
 }
