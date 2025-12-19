@@ -15,6 +15,8 @@ HexaGonPopulation::HexaGonPopulation()
 	m_pLookup2 = NULL;
 	m_bSorted = false;
 	m_pVisited = NULL;
+	m_pCrossover1 = NULL;
+	m_pCrossover2 = NULL;
 }
 
 HexaGonPopulation::HexaGonPopulation(int numPopulation, int row)
@@ -39,6 +41,8 @@ HexaGonPopulation::HexaGonPopulation(int numPopulation, int row)
 	m_pLookup1 = new int[m_numElement + 1];
 	m_pLookup2 = new int[m_numElement + 1];		
 	m_pVisited = new bool[m_numElement + 1];
+	m_pCrossover1 = new bool[m_numElement];
+	m_pCrossover2 = new bool[m_numElement];
 	m_bSorted = false;
 }
 
@@ -71,12 +75,20 @@ HexaGonPopulation::~HexaGonPopulation()
 		delete[]m_pLookup2;
 		m_pLookup2 = NULL;
 	}
+	if (m_pCrossover1) {
+		delete[]m_pCrossover1;
+		m_pCrossover1 = NULL;
+	}
+	if (m_pCrossover2) {
+		delete[]m_pCrossover2;
+		m_pCrossover2 = NULL;
+	}
 	m_bSorted = false;
 }
 
 void HexaGonPopulation::MakeLookupTable(int numPoint, int* val1, int* val2, int *newVal1, int *newVal2)
 {
-    for (int i = 0; i < m_numElement + 1; i++) {
+    /*for (int i = 0; i < m_numElement + 1; i++) {
         m_pLookup1[i] = i;
         m_pLookup2[i] = i;
         m_pVisited[i] = false;
@@ -105,7 +117,31 @@ void HexaGonPopulation::MakeLookupTable(int numPoint, int* val1, int* val2, int 
                 pos++;
             }
         }
-    }
+    }*/
+	int temp;
+	for (int i = 0; i < m_numElement + 1; i++) {
+		m_pLookup1[i] = i;
+		m_pLookup2[i] = i;
+		//m_pVisited[i] = false;
+	}
+	for (int i = 0; i < numPoint; i++) {
+		m_pLookup1[val2[m_pCrossoverPoint[i]]] = val1[m_pCrossoverPoint[i]];
+		m_pLookup2[val1[m_pCrossoverPoint[i]]] = val2[m_pCrossoverPoint[i]];
+	}
+	/*for (int i = 0; i < numPoint; i++) {
+		temp = m_pLookup1[val2[m_pCrossoverPoint[i]]];
+		while (temp != m_pLookup1[temp]) {
+			temp = m_pLookup1[temp];
+		}
+		m_pLookup1[val2[m_pCrossoverPoint[i]]] = temp;
+
+		temp = m_pLookup2[val1[m_pCrossoverPoint[i]]];
+		while (temp != m_pLookup2[temp]) {
+			temp = m_pLookup2[temp];
+		}
+		m_pLookup2[val1[m_pCrossoverPoint[i]]] = temp;
+
+	}*/
 }
 
 void HexaGonPopulation::Crossover(int p1, int p2, int new1, int new2)
@@ -160,31 +196,39 @@ void HexaGonPopulation::Crossover(int p1, int p2, int new1, int new2)
 
     MakeLookupTable(numPoint, val1, val2, newVal1, newVal2);
     
-    for (int i = 0; i < m_numElement; i++) {
-        newVal1[i] = m_pLookup1[val1[i]];
-        newVal2[i] = m_pLookup2[val2[i]];
-    }
-    for (int i = 0; i < numPoint; i++) {
-        newVal1[m_pCrossoverPoint[i]] = val2[m_pCrossoverPoint[i]];
-        newVal2[m_pCrossoverPoint[i]] = val1[m_pCrossoverPoint[i]];
-    }
-    /*if (!m_pPopulation[new1]->CheckValid()) {
-        printf("Debug!!\n");
-        m_pPopulation[p1]->PrintFullHexa();
-        m_pPopulation[p2]->PrintFullHexa();
-        printf("%d, %d => %d, %d\n", p1, p2, m_pPopulation[p1]->CheckValid(), m_pPopulation[p2]->CheckValid());
-        m_pPopulation[new1]->PrintFullHexa();
-        printf("\n");
-    }
-    if (!m_pPopulation[new2]->CheckValid()) {
-        printf("Debug!!\n");
-        m_pPopulation[p1]->PrintFullHexa();
-        m_pPopulation[p2]->PrintFullHexa();
-        printf("%d, %d => %d, %d\n", p1, p2, m_pPopulation[p1]->CheckValid(), m_pPopulation[p2]->CheckValid());
-        
-        m_pPopulation[new2]->PrintFullHexa();
-        printf("\n");
-    }*/
+	for (int i = 0; i < m_numElement; i++) {
+		newVal1[i] = m_pLookup1[val1[i]];
+		newVal2[i] = m_pLookup2[val2[i]];
+		m_pCrossover1[i] = false;
+		m_pCrossover2[i] = false;
+	}
+	for (int i = 0; i < numPoint; i++) {
+		newVal1[m_pCrossoverPoint[i]] = val2[m_pCrossoverPoint[i]];
+		newVal2[m_pCrossoverPoint[i]] = val1[m_pCrossoverPoint[i]];
+		m_pCrossover1[m_pCrossoverPoint[i]] = true;
+		m_pCrossover2[m_pCrossoverPoint[i]] = true;
+	}
+	
+	for (int i = 0; i < m_numElement; i++) {
+		if (!m_pCrossover1[i]) {
+			temp = m_pLookup1[val1[i]];
+			while (temp != m_pLookup1[temp]) {
+				temp = m_pLookup1[temp];
+			}
+			newVal1[i] = temp;
+
+			temp = m_pLookup2[val2[i]];
+			while (temp != m_pLookup2[temp]) {
+				temp = m_pLookup2[temp];
+			}
+			newVal2[i] = temp;
+
+
+		}
+		//newVal1[i] = m_pLookup1[val1[i]];
+		//newVal2[i] = m_pLookup2[val2[i]];
+	}
+    
     
 	m_pPopulation[new1]->Update();
 	m_pPopulation[new2]->Update();
@@ -193,6 +237,7 @@ void HexaGonPopulation::Crossover(int p1, int p2, int new1, int new2)
 
 void HexaGonPopulation::CrossoverRandomPoint(int p1, int p2, int new1, int new2)
 {
+	int temp;
     int numPoint = (int)(rand() % m_numElement);
 	for (int i = 0; i < numPoint; i++) {
 		m_pCrossoverPoint[i] = (int)(rand() % m_numElement);
@@ -209,11 +254,36 @@ void HexaGonPopulation::CrossoverRandomPoint(int p1, int p2, int new1, int new2)
 	for (int i = 0; i < m_numElement; i++) {
 		newVal1[i] = m_pLookup1[val1[i]];
 		newVal2[i] = m_pLookup2[val2[i]];
+		m_pCrossover1[i] = false;
+		m_pCrossover2[i] = false;
 	}
 	for (int i = 0; i < numPoint; i++) {
 		newVal1[m_pCrossoverPoint[i]] = val2[m_pCrossoverPoint[i]];
 		newVal2[m_pCrossoverPoint[i]] = val1[m_pCrossoverPoint[i]];
+		m_pCrossover1[m_pCrossoverPoint[i]] = true;
+		m_pCrossover2[m_pCrossoverPoint[i]] = true;
 	}
+
+	for (int i = 0; i < m_numElement; i++) {
+		if (!m_pCrossover1[i]) {
+			temp = m_pLookup1[val1[i]];
+			while (temp != m_pLookup1[temp]) {
+				temp = m_pLookup1[temp];
+			}
+			newVal1[i] = temp;
+
+			temp = m_pLookup2[val2[i]];
+			while (temp != m_pLookup2[temp]) {
+				temp = m_pLookup2[temp];
+			}
+			newVal2[i] = temp;
+
+
+		}
+		//newVal1[i] = m_pLookup1[val1[i]];
+		//newVal2[i] = m_pLookup2[val2[i]];
+	}
+	
 	/*if (!m_pPopulation[new1]->CheckValid()) {
         printf("Debug!!\n");
         m_pPopulation[p1]->PrintFullHexa();
@@ -270,6 +340,9 @@ void HexaGonPopulation::FullCrossover(int topK)
 	for (int next = topK; next < m_numPopulation; next += 2) {
 		p1 = (int)(rand() % m_numPopulation);
 		p2 = (int)(rand() % m_numPopulation);
+		//p1 = (int)(rand() % topK);
+		//p2 = (int)(rand() % topK);
+
 		while (p1 == p2 || p1 == next || p1 == next + 1 || p2 == next || p2 == next + 1) {
             p1 = (int)(rand() % m_numPopulation);
 			p2 = (int)(rand() % m_numPopulation);

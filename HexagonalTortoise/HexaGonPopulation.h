@@ -11,6 +11,9 @@ private:
 	int* m_pLookup1;
 	int* m_pLookup2;
 	bool* m_pVisited;
+	bool* m_pCrossover1;
+	bool* m_pCrossover2;
+
     HexaGonNew** m_pPopulation;
 	int m_numPopulation;
 	int m_numElement;
