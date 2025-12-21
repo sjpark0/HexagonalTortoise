@@ -31,13 +31,18 @@ int main()
     printf("%f, %d\n", pop.GetFitness(), pop.CheckValid());*/
     
 	HexaGonPopulation pop(100, 3);
-	pop.Sorting();
 	for (int i = 0; i < 1000000; i++) {
-		printf("%d : %f, %d\n", i, pop.GetFitness(), pop.CheckValid());
+		if (i % 100 == 0) {
+			printf("%d : %f, %d\n", i, pop.GetFitness(), pop.CheckValid());
+		//	pop.PrintFitness(10);
+		}
+		pop.MakeChoromosome();
 		//printf("%d\n", i);
 		//pop.PrintFitness(10);
-		pop.FullCrossover(100);
+		//pop.FullCrossover(100);
 	}
+	pop.PrintFitness(10);
+
 	pop.PrintFittest();
 }
 

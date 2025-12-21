@@ -20,18 +20,23 @@ private:
 	int m_numPopulation;
 	int m_numElement;
 	int m_next;
-	
+
+	void Crossover(HexaGonNew* p1, HexaGonNew* p2, HexaGonNew* new1, HexaGonNew* new2);
+	void CrossoverRandomPoint(HexaGonNew* p1, HexaGonNew* p2, HexaGonNew* new1, HexaGonNew* new2);
+	void Mutate(HexaGonNew* c);
+	void Replacement(HexaGonNew* c);
 	void MakeLookupTable(int numPoint, int* val1, int* val2, int* newVal1, int *newVal2);
+	int Similarity(HexaGonNew* c1, HexaGonNew* c2);
+	int GetSimilarityIdx(HexaGonNew* c);
 	int GetSelect();
 	void ComputeFitnessOrder();
+	void Sorting();
+
 public:
 	HexaGonPopulation();
 	HexaGonPopulation(int numPopulation, int row);
 	~HexaGonPopulation();
-	void Crossover(HexaGonNew* p1, HexaGonNew* p2, HexaGonNew* new1, HexaGonNew* new2);
-	void CrossoverRandomPoint(HexaGonNew* p1, HexaGonNew* p2, HexaGonNew* new1, HexaGonNew* new2);
-	void Sorting();
-	
+	void MakeChoromosome();
 	void FullCrossover(int topK);
 	float GetFitness();
 	void PrintFitness(int topK);

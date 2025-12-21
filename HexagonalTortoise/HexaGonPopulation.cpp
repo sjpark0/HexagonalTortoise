@@ -258,11 +258,11 @@ void HexaGonPopulation::Sorting()
 }
 void HexaGonPopulation::ComputeFitnessOrder()
 {
-	int minFitness = 10000;
-	int maxFitness = 40000;
+	int minFitness = 100;
+	int k = 2;
 	m_sumFitness = 0;
 	for (int i = 0; i < m_numPopulation; i++) {
-		m_pFitness[i] = maxFitness + i * (float)(minFitness - maxFitness) / (float)(m_numPopulation - 1);
+		m_pFitness[i] = minFitness + (m_numPopulation - i) * k;
 		m_sumFitness += m_pFitness[i];
 	}
 }
@@ -272,7 +272,8 @@ float HexaGonPopulation::GetFitness()
 }	
 int HexaGonPopulation::GetSelect()
 {
-	int val = (int)rand() * (int)rand();
+	//int val = (int)rand() * (int)rand();
+	int val = (int)rand();
 	int point = (int)(val % m_sumFitness);
 	int sum = 0;
 	for (int i = 0; i < m_numPopulation; i++) {
@@ -282,6 +283,118 @@ int HexaGonPopulation::GetSelect()
 	return m_numPopulation - 1;
 	//return (int)(rand() % m_numPopulation);
 }
+int HexaGonPopulation::Similarity(HexaGonNew* c1, HexaGonNew* c2)
+{
+	int sum = 0;
+	int* val1 = c1->GetValue();
+	int* val2 = c2->GetValue();
+	for (int i = 0; i < m_numElement; i++) {
+		sum += abs(val1[i] - val2[i]);
+	}
+	return sum;
+}
+
+int HexaGonPopulation::GetSimilarityIdx(HexaGonNew* c)
+{
+	int minSimilairty = Similarity(m_pPopulation[0], c);
+	int minIdx = 0;
+	int sim;
+	for (int i = 1; i < m_numPopulation; i++) {
+		sim = Similarity(m_pPopulation[i], c);
+		if (minSimilairty > sim) {
+			minSimilairty = sim;
+			minIdx = i;
+		}
+	}
+	return minIdx;
+}
+void HexaGonPopulation::Replacement(HexaGonNew* c)
+{
+	int id = GetSimilarityIdx(c);
+	/*if (c->GetFitness() > m_pPopulation[id]->GetFitness()) {
+		for (int i = id + 1; i < m_numPopulation; i++) {
+			if (c->GetFitness() < m_pPopulation[i]->GetFitness()) {
+				m_pPopulation[i - 1]->Generate(c->GetValue());
+				m_pPopulation[i - 1]->Update();
+
+				break;
+			}
+			else {
+				m_pPopulation[i - 1]->Generate(m_pPopulation[i]->GetValue());
+				m_pPopulation[i - 1]->Update();
+			}
+		}
+		if (c->GetFitness() > m_pPopulation[m_numPopulation - 1]->GetFitness()) {
+			m_pPopulation[m_numPopulation - 1]->Generate(c->GetValue());
+			m_pPopulation[m_numPopulation - 1]->Update();
+		}
+		
+	}
+	else {
+		for (int i = id - 1; i >= 0; i--) {
+			if (c->GetFitness() > m_pPopulation[i]->GetFitness()) {
+				m_pPopulation[i + 1]->Generate(c->GetValue());
+				m_pPopulation[i + 1]->Update();
+				break;
+			}
+			else {
+				m_pPopulation[i + 1]->Generate(m_pPopulation[i]->GetValue());
+				m_pPopulation[i + 1]->Update();
+			}
+		}
+		if (c->GetFitness() < m_pPopulation[0]->GetFitness()) {
+			m_pPopulation[0]->Generate(c->GetValue());
+			m_pPopulation[0]->Update();
+		}
+	}*/
+	if (c->GetFitness() < m_pPopulation[id]->GetFitness()) {
+		for (int i = id - 1; i >= 0; i--) {
+			if (c->GetFitness() > m_pPopulation[i]->GetFitness()) {
+				m_pPopulation[i + 1]->Generate(c->GetValue());
+				m_pPopulation[i + 1]->Update();
+				break;
+			}
+			else {
+				m_pPopulation[i + 1]->Generate(m_pPopulation[i]->GetValue());
+				m_pPopulation[i + 1]->Update();
+			}
+		}
+		if (c->GetFitness() < m_pPopulation[0]->GetFitness()) {
+			m_pPopulation[0]->Generate(c->GetValue());
+			m_pPopulation[0]->Update();
+		}
+	}
+}
+void HexaGonPopulation::Mutate(HexaGonNew* c)
+{
+	int *val = c->GetValue();
+	int id1;
+	int id2;
+	int temp;
+	if (rand() % 100 == 0) {
+		id1 = rand() % m_numElement;
+		id2 = rand() % m_numElement;
+		temp = val[id1];
+		val[id1] = val[id2];
+		val[id2] = temp;
+		c->Update();
+	}
+}
+
+void HexaGonPopulation::MakeChoromosome()
+{
+	int p1 = GetSelect();
+	int p2 = GetSelect();
+	CrossoverRandomPoint(m_pPopulation[p1], m_pPopulation[p2], m_pPopulationTemp[0], m_pPopulationTemp[1]);
+	
+	Mutate(m_pPopulationTemp[0]);
+	Mutate(m_pPopulationTemp[1]);
+
+	Replacement(m_pPopulationTemp[0]);
+	Replacement(m_pPopulationTemp[1]);
+	
+}
+
 void HexaGonPopulation::FullCrossover(int topK)
 {
 	int p1;
