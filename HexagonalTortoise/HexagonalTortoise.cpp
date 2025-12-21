@@ -40,10 +40,11 @@ int main()
 		//printf("%d\n", i);
 		//pop.PrintFitness(10);
 		//pop.FullCrossover(100);
+		//if (pop.GetFitness() < 0.01) break;
 	}
 	pop.PrintFitness(10);
-
 	pop.PrintFittest();
+
 }
 
 // 프로그램 실행: <Ctrl+F5> 또는 [디버그] > [디버깅하지 않고 시작] 메뉴

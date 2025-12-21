@@ -281,7 +281,6 @@ int HexaGonPopulation::GetSelect()
 		if (point < sum) return i;
 	}
 	return m_numPopulation - 1;
-	//return (int)(rand() % m_numPopulation);
 }
 int HexaGonPopulation::Similarity(HexaGonNew* c1, HexaGonNew* c2)
 {
@@ -418,6 +417,11 @@ void HexaGonPopulation::PrintFittest()
 {
 	Sorting();
 	m_pPopulation[0]->PrintFullHexa();
+	for (int i = 0; i < m_pPopulation[0]->GetRow(); i++) {
+		for (int j = 0; j < m_pPopulation[0]->GetRow(); j++) {
+			m_pPopulation[0]->PrintOneHexa(i, j);
+		}
+	}
 }
 void HexaGonPopulation::PrintFitness(int topK)
 {
@@ -425,6 +429,8 @@ void HexaGonPopulation::PrintFitness(int topK)
 		printf("%f, ", m_pPopulation[i]->GetFitness());
 	}
 	printf("%f\n", m_pPopulation[topK - 1]->GetFitness());
+	m_pPopulation[0]->PrintFullHexa();
+	m_pPopulation[m_numPopulation - 1]->PrintFullHexa();
 }
 bool HexaGonPopulation::CheckValid()
 {

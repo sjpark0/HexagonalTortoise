@@ -30,6 +30,7 @@ public:
 	float GetFitness();
 	int* GetValue();
 	int GetNumValue();
+	int GetRow();
 	bool CheckValid();
 };
 
