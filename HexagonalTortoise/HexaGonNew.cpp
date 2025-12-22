@@ -160,6 +160,7 @@ void HexaGonNew::ComputeFitness()
 		std += (m_sum[i] - avg) * (m_sum[i] - avg);
 	}
 	m_fitness = sqrt(std / (m_row * m_row)) + 10000.0 / avg;
+	//m_fitness = sqrt(std / (m_row * m_row));
 
 	/*float std = 1.0;
 	for (int i = 0; i < m_row * m_row; i++) {

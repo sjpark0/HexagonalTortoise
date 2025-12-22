@@ -30,8 +30,8 @@ int main()
     pop.FullCrossover(10);
     printf("%f, %d\n", pop.GetFitness(), pop.CheckValid());*/
     
-	HexaGonPopulation pop(100, 3);
-	for (int i = 0; i < 1000000; i++) {
+	HexaGonPopulation pop(100, 4);
+	for (int i = 0; i < 100000000; i++) {
 		if (i % 100 == 0) {
 			printf("%d : %f, %d\n", i, pop.GetFitness(), pop.CheckValid());
 		//	pop.PrintFitness(10);
