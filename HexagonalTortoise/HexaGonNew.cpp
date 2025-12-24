@@ -9,6 +9,7 @@ HexaGonNew::HexaGonNew()
 {
 	srand((unsigned int)time(NULL));
 	m_pValue = NULL;
+	m_pValuePheno = NULL;
 	m_pHexa = NULL;
 	m_sum = NULL;
 	m_pValid = NULL;
@@ -23,6 +24,10 @@ HexaGonNew::~HexaGonNew()
 	if (m_pValue) {
 		delete[]m_pValue;
 		m_pValue = NULL;
+	}
+	if (m_pValuePheno) {
+		delete[]m_pValuePheno;
+		m_pValuePheno = NULL;
 	}
 	if (m_pHexa) {
 		for (int i = 0; i < m_row * m_row; i++) {
@@ -46,6 +51,7 @@ void HexaGonNew::MakeHexa(int row)
 	m_row = row;
 	m_num = 2 * row * (row + 2);
 	m_pValue = new int[m_num];
+	m_pValuePheno = new int[m_num];
 	m_pValid = new bool[m_num + 1];
 	m_pHexa = new int** [m_row * m_row];
 	m_sum = new int[m_row * m_row];
@@ -55,8 +61,8 @@ void HexaGonNew::MakeHexa(int row)
 			start1 = 2 * (m_row + 1) * i + 2 * j;
 			start2 = 2 * (m_row + 1) * (i + 1) - 1 + 2 * j;
 			for (int k = 0; k < 3; k++) {
-				m_pHexa[j + i * m_row][k] = &m_pValue[start1 + k];
-				m_pHexa[j + i * m_row][5 - k] = &m_pValue[start2 + k];
+				m_pHexa[j + i * m_row][k] = &m_pValuePheno[start1 + k];
+				m_pHexa[j + i * m_row][5 - k] = &m_pValuePheno[start2 + k];
 			}
 		}
 	}
@@ -115,19 +121,17 @@ void HexaGonNew::Generate()
 		}
 
 	}
-	ComputeSum();
-	ComputeFitness();
 }
 void HexaGonNew::Generate(int* value)
 {
-	memcpy(m_pValue, value, m_num * sizeof(int));
-	ComputeSum();
-	ComputeFitness();
+	memcpy(m_pValue, value, m_num * sizeof(int));	
 }
 void HexaGonNew::Update()
 {
+	memcpy(m_pValuePheno, m_pValue, m_num * sizeof(int));
 	ComputeSum();
 	ComputeFitness();
+	Optimize();
 }
 void HexaGonNew::ComputeSum()
 {
@@ -159,8 +163,8 @@ void HexaGonNew::ComputeFitness()
 	for (int i = 0; i < m_row * m_row; i++) {
 		std += (m_sum[i] - avg) * (m_sum[i] - avg);
 	}
-	m_fitness = sqrt(std / (m_row * m_row)) + 10000.0 / avg;
-	//m_fitness = sqrt(std / (m_row * m_row));
+	//m_fitness = sqrt(std / (m_row * m_row)) + 10000.0 / avg;
+	m_fitness = sqrt(std / (m_row * m_row));
 
 	/*float std = 1.0;
 	for (int i = 0; i < m_row * m_row; i++) {
@@ -169,6 +173,35 @@ void HexaGonNew::ComputeFitness()
 	m_fitness = 1.0 / std;*/
 	
 }
+void HexaGonNew::Optimize()
+{
+	float minTemp;
+	int rotate;
+	float minVal = m_fitness;
+	while (true) {
+		for (int i = 0; i < m_row; i++) {
+			for (int j = 0; j < m_row; j++) {
+				minTemp = m_fitness;
+				rotate = 0;
+				for (int k = 1; k < 6; k++) {
+					Rotate(i, j);
+					if (m_fitness < minTemp) {
+						minTemp = m_fitness;
+						rotate = k;
+					}
+				}
+				Rotate(i, j);
+
+				for (int k = 0; k < rotate; k++) {
+					Rotate(i, j);
+				}
+			}
+		}
+		minVal = m_fitness;
+		if (minVal == m_fitness) break;
+	}
+}
+
 void HexaGonNew::Rotate(int row, int col)
 {
 	int temp = *m_pHexa[col + row * m_row][0];
@@ -256,6 +289,11 @@ int* HexaGonNew::GetValue()
 {
 	return m_pValue;
 }
+int* HexaGonNew::GetPhenoValue()
+{
+	return m_pValuePheno;
+}
+
 int HexaGonNew::GetNumValue()
 {
 	return m_num;

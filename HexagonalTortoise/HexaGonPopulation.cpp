@@ -33,6 +33,7 @@ HexaGonPopulation::HexaGonPopulation(int numPopulation, int row)
 	}
 	for (int i = 0; i < m_numPopulation; i++) {
 		m_pPopulation[i]->Generate();
+		m_pPopulation[i]->Update();
 	}
 
 	m_numElement = m_pPopulation[0]->GetNumValue();
@@ -285,8 +286,11 @@ int HexaGonPopulation::GetSelect()
 int HexaGonPopulation::Similarity(HexaGonNew* c1, HexaGonNew* c2)
 {
 	int sum = 0;
-	int* val1 = c1->GetValue();
-	int* val2 = c2->GetValue();
+	//int* val1 = c1->GetValue();
+	//int* val2 = c2->GetValue();
+	int* val1 = c1->GetPhenoValue();
+	int* val2 = c2->GetPhenoValue();
+
 	for (int i = 0; i < m_numElement; i++) {
 		sum += abs(val1[i] - val2[i]);
 	}
