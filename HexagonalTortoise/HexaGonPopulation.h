@@ -5,6 +5,8 @@ class HexaGonNew;
 class HexaGonPopulation
 {
 private:
+	
+	//std::mt19937* m_gen;
 	int MAX_POINT = 3;
 	int* m_pStart;
     int* m_pCrossoverPoint;

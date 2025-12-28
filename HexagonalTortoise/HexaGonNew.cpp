@@ -61,8 +61,8 @@ void HexaGonNew::MakeHexa(int row)
 			start1 = 2 * (m_row + 1) * i + 2 * j;
 			start2 = 2 * (m_row + 1) * (i + 1) - 1 + 2 * j;
 			for (int k = 0; k < 3; k++) {
-				m_pHexa[j + i * m_row][k] = &m_pValuePheno[start1 + k];
-				m_pHexa[j + i * m_row][5 - k] = &m_pValuePheno[start2 + k];
+				m_pHexa[j + i * m_row][k] = &m_pValue[start1 + k];
+				m_pHexa[j + i * m_row][5 - k] = &m_pValue[start2 + k];
 			}
 		}
 	}
@@ -70,39 +70,6 @@ void HexaGonNew::MakeHexa(int row)
 
 void HexaGonNew::Generate()
 {
-	/*m_pValue[0] = 7;
-	m_pValue[1] = 11;
-	m_pValue[2] = 28;
-	m_pValue[3] = 2;
-	m_pValue[4] = 22;
-	m_pValue[5] = 9;
-	m_pValue[6] = 12;
-
-	m_pValue[7] = 8;
-	m_pValue[8] = 25;
-	m_pValue[9] = 30;
-	m_pValue[10] = 6;
-	m_pValue[11] = 21;
-	m_pValue[12] = 19;
-	m_pValue[13] = 26;
-	m_pValue[14] = 4;
-
-	m_pValue[15] = 1;
-	m_pValue[16] = 24;
-	m_pValue[17] = 23;
-	m_pValue[18] = 27;
-	m_pValue[19] = 13;
-	m_pValue[20] = 29;
-	m_pValue[21] = 18;
-	m_pValue[22] = 16;
-
-	m_pValue[23] = 5;
-	m_pValue[24] = 10;
-	m_pValue[25] = 20;
-	m_pValue[26] = 3;
-	m_pValue[27] = 17;
-	m_pValue[28] = 14;
-	m_pValue[29] = 15;*/
 	int numVisited = 0;
 	int val;
 	int pos;
@@ -131,7 +98,7 @@ void HexaGonNew::Update()
 	memcpy(m_pValuePheno, m_pValue, m_num * sizeof(int));
 	ComputeSum();
 	ComputeFitness();
-	Optimize();
+	//Optimize();
 }
 void HexaGonNew::ComputeSum()
 {
@@ -163,8 +130,8 @@ void HexaGonNew::ComputeFitness()
 	for (int i = 0; i < m_row * m_row; i++) {
 		std += (m_sum[i] - avg) * (m_sum[i] - avg);
 	}
-	//m_fitness = sqrt(std / (m_row * m_row)) + 10000.0 / avg;
-	m_fitness = sqrt(std / (m_row * m_row));
+	m_fitness = sqrt(std / (m_row * m_row)) + 10000.0 / avg;
+	//m_fitness = sqrt(std / (m_row * m_row));
 
 	/*float std = 1.0;
 	for (int i = 0; i < m_row * m_row; i++) {
@@ -197,8 +164,10 @@ void HexaGonNew::Optimize()
 				}
 			}
 		}
-		minVal = m_fitness;
 		if (minVal == m_fitness) break;
+
+		minVal = m_fitness;
+
 	}
 }
 

@@ -1,12 +1,17 @@
 #include "HexaGonPopulation.h"
 #include "HexaGonNew.h"
-#include <stdio.h>
-#include <cstdlib>
 #include <ctime>
+#include <random>
+//#include <stdio.h>
+//#include <cstdlib>
+
+std::random_device rd;
+std::mt19937 gen(rd());
 
 HexaGonPopulation::HexaGonPopulation()
 {
-	srand((unsigned int)time(NULL));
+	//srand((unsigned int)time(NULL));
+
 	m_pPopulation = NULL;
 	m_pPopulationTemp = NULL;
 	m_pStart = NULL;
@@ -21,8 +26,7 @@ HexaGonPopulation::HexaGonPopulation()
 
 HexaGonPopulation::HexaGonPopulation(int numPopulation, int row)
 {
-	srand((unsigned int)time(NULL));
-	
+	//srand((unsigned int)time(NULL));
 	m_numPopulation = numPopulation;
 	m_pPopulation = new HexaGonNew*[m_numPopulation];
 	m_pPopulationTemp = new HexaGonNew * [m_numPopulation];
@@ -85,7 +89,8 @@ HexaGonPopulation::~HexaGonPopulation()
 	}
 	if (m_pFitness) {
 		delete[]m_pFitness;
-	}
+		m_pFitness = NULL;
+	}	
 }
 
 void HexaGonPopulation::MakeLookupTable(int numPoint, int* val1, int* val2, int *newVal1, int *newVal2)
@@ -105,10 +110,15 @@ void HexaGonPopulation::MakeLookupTable(int numPoint, int* val1, int* val2, int 
 
 void HexaGonPopulation::Crossover(HexaGonNew* p1, HexaGonNew* p2, HexaGonNew* new1, HexaGonNew* new2)
 {
-	int numPoint = (int)(rand() % MAX_POINT) + 1;
+	//int numPoint = (int)(rand() % MAX_POINT) + 1;
+	std::uniform_int_distribution<int> dist(0, MAX_POINT - 1);
+	std::uniform_int_distribution<int> dist1(0, m_numElement - 1);
+
+	int numPoint = dist(gen) + 1;
 	int temp;
 	for (int i = 0; i < numPoint; i++) {
-		m_pStart[i] = (int)(rand() % m_numElement);		
+		//m_pStart[i] = (int)(rand() % m_numElement);
+		m_pStart[i] = dist1(gen);
 	}
 	for (int i = 0; i < numPoint; i++) {
 		for (int j = i + 1; j < numPoint; j++) {
@@ -127,7 +137,9 @@ void HexaGonPopulation::Crossover(HexaGonNew* p1, HexaGonNew* p2, HexaGonNew* ne
             cnt++;
 		}
 		else {
-			temp = (int)(rand() % (m_pStart[i + 1] - m_pStart[i]));
+			std::uniform_int_distribution<int> dist2(0, m_pStart[i + 1] - m_pStart[i] - 1);
+			temp = dist2(gen);
+			//temp = (int)(rand() % (m_pStart[i + 1] - m_pStart[i]));
             for (int j = m_pStart[i]; j < m_pStart[i] + temp; j++) {
                 m_pCrossoverPoint[cnt] = j;
                 cnt++;
@@ -140,7 +152,9 @@ void HexaGonPopulation::Crossover(HexaGonNew* p1, HexaGonNew* p2, HexaGonNew* ne
         cnt++;
 	}
 	else {
-        temp = (int)(rand() % (m_numElement - 1 - m_pStart[numPoint - 1]));
+		std::uniform_int_distribution<int> dist3(0, m_numElement - 1 - m_pStart[numPoint - 1] - 1);
+		temp = dist3(gen);
+        //temp = (int)(rand() % (m_numElement - 1 - m_pStart[numPoint - 1]));
         for (int j = m_pStart[numPoint - 1]; j < m_pStart[numPoint - 1] + temp; j++) {
             m_pCrossoverPoint[cnt] = j;
             cnt++;
@@ -195,9 +209,12 @@ void HexaGonPopulation::Crossover(HexaGonNew* p1, HexaGonNew* p2, HexaGonNew* ne
 void HexaGonPopulation::CrossoverRandomPoint(HexaGonNew* p1, HexaGonNew* p2, HexaGonNew* new1, HexaGonNew* new2)
 {
 	int temp;
-    int numPoint = (int)(rand() % m_numElement);
+	std::uniform_int_distribution<int> dist(0, m_numElement - 1);
+    //int numPoint = (int)(rand() % m_numElement);
+	int numPoint = dist(gen);
 	for (int i = 0; i < numPoint; i++) {
-		m_pCrossoverPoint[i] = (int)(rand() % m_numElement);
+		//m_pCrossoverPoint[i] = (int)(rand() % m_numElement);
+		m_pCrossoverPoint[i] = dist(gen);
 	}
 
 	int* val1 = p1->GetValue();
@@ -273,9 +290,10 @@ float HexaGonPopulation::GetFitness()
 }	
 int HexaGonPopulation::GetSelect()
 {
-	//int val = (int)rand() * (int)rand();
-	int val = (int)rand();
-	int point = (int)(val % m_sumFitness);
+	//int val = (int)rand();
+	//int point = (int)(val % m_sumFitness);
+	std::uniform_int_distribution<int> dist(0, m_sumFitness - 1);
+	int point = dist(gen);
 	int sum = 0;
 	for (int i = 0; i < m_numPopulation; i++) {
 		sum += m_pFitness[i];
@@ -286,10 +304,10 @@ int HexaGonPopulation::GetSelect()
 int HexaGonPopulation::Similarity(HexaGonNew* c1, HexaGonNew* c2)
 {
 	int sum = 0;
-	//int* val1 = c1->GetValue();
-	//int* val2 = c2->GetValue();
-	int* val1 = c1->GetPhenoValue();
-	int* val2 = c2->GetPhenoValue();
+	int* val1 = c1->GetValue();
+	int* val2 = c2->GetValue();
+	//int* val1 = c1->GetPhenoValue();
+	//int* val2 = c2->GetPhenoValue();
 
 	for (int i = 0; i < m_numElement; i++) {
 		sum += abs(val1[i] - val2[i]);
@@ -374,9 +392,14 @@ void HexaGonPopulation::Mutate(HexaGonNew* c)
 	int id1;
 	int id2;
 	int temp;
-	if (rand() % 100 == 0) {
-		id1 = rand() % m_numElement;
-		id2 = rand() % m_numElement;
+	std::uniform_int_distribution<int> dist(0, 99);
+	std::uniform_int_distribution<int> dist1(0, m_numElement - 1);
+	//if (rand() % 100 == 0) {
+		//id1 = rand() % m_numElement;
+		//id2 = rand() % m_numElement;
+	if(dist(gen) == 0){
+		id1 = dist1(gen);
+		id2 = dist1(gen);
 		temp = val[id1];
 		val[id1] = val[id2];
 		val[id2] = temp;
@@ -388,8 +411,9 @@ void HexaGonPopulation::MakeChoromosome()
 {
 	int p1 = GetSelect();
 	int p2 = GetSelect();
-	CrossoverRandomPoint(m_pPopulation[p1], m_pPopulation[p2], m_pPopulationTemp[0], m_pPopulationTemp[1]);
-	
+	//CrossoverRandomPoint(m_pPopulation[p1], m_pPopulation[p2], m_pPopulationTemp[0], m_pPopulationTemp[1]);
+	Crossover(m_pPopulation[p1], m_pPopulation[p2], m_pPopulationTemp[0], m_pPopulationTemp[1]);
+
 	Mutate(m_pPopulationTemp[0]);
 	Mutate(m_pPopulationTemp[1]);
 

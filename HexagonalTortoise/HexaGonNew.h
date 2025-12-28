@@ -35,4 +35,3 @@ public:
 	int GetRow();
 	bool CheckValid();
 };
-

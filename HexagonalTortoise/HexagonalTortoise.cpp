@@ -5,46 +5,21 @@
 #include "HexaGon.h"
 #include "HexaGonNew.h"
 #include "HexaGonPopulation.h"
+
+#include <ctime>
+#include <random>
+
 int main()
-{
-	/*HexaGonNew hexaNew(3);
-	hexaNew.Generate();
-	for (int i = 0; i < 3; i++) {
-		for (int j = 0; j < 3; j++) {
-			hexaNew.PrintOneHexa(i, j);
-		}
-	}
-	hexaNew.PrintFullHexa();
-
-	hexaNew.Rotate(1, 2);
-	for (int i = 0; i < 3; i++) {
-		for (int j = 0; j < 3; j++) {
-			hexaNew.PrintOneHexa(i, j);
-		}
-	}
-	hexaNew.PrintFullHexa();*/
-
-    /*HexaGonPopulation pop(100, 3);
-    printf("%f, %d\n", pop.GetFitness(), pop.CheckValid());
-        
-    pop.FullCrossover(10);
-    printf("%f, %d\n", pop.GetFitness(), pop.CheckValid());*/
-    
-	HexaGonPopulation pop(100, 3);
+{    
+	HexaGonPopulation pop(32, 3);
 	for (int i = 0; i < 1000000; i++) {
 		if (i % 100 == 0) {
 			printf("%d : %f, %d\n", i, pop.GetFitness(), pop.CheckValid());
-		//	pop.PrintFitness(10);
 		}
 		pop.MakeChoromosome();
-		//printf("%d\n", i);
-		//pop.PrintFitness(10);
-		//pop.FullCrossover(100);
-		//if (pop.GetFitness() < 0.01) break;
 	}
 	pop.PrintFitness(10);
-	pop.PrintFittest();
-
+	pop.PrintFittest();	
 }
 
 // 프로그램 실행: <Ctrl+F5> 또는 [디버그] > [디버깅하지 않고 시작] 메뉴
