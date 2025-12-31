@@ -3,7 +3,6 @@
 
 #include <iostream>
 #include "HexaGon.h"
-#include "HexaGonNew.h"
 #include "HexaGonPopulation.h"
 
 #include <ctime>

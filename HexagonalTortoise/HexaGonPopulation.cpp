@@ -1,5 +1,5 @@
 #include "HexaGonPopulation.h"
-#include "HexaGonNew.h"
+#include "HexaGon.h"
 #include <ctime>
 #include <random>
 //#include <stdio.h>
@@ -22,19 +22,30 @@ HexaGonPopulation::HexaGonPopulation()
 	m_pVisited = NULL;
 	m_pCrossover = NULL;
 	m_pFitness = NULL;
+#ifdef Sharing
+	m_pSharing = NULL;
+	m_pFitnessSharing = NULL;
+#endif
 }
 
 HexaGonPopulation::HexaGonPopulation(int numPopulation, int row)
 {
 	//srand((unsigned int)time(NULL));
 	m_numPopulation = numPopulation;
-	m_pPopulation = new HexaGonNew*[m_numPopulation];
-	m_pPopulationTemp = new HexaGonNew * [m_numPopulation];
+	m_pPopulation = new HexaGon *[m_numPopulation];
+	m_pPopulationTemp = new HexaGon * [m_numPopulation];
 
 	for (int i = 0; i < m_numPopulation; i++) {
-		m_pPopulation[i] = new HexaGonNew(row);
-		m_pPopulationTemp[i] = new HexaGonNew(row);
+		m_pPopulation[i] = new HexaGon(row);
+		m_pPopulationTemp[i] = new HexaGon(row);
 	}
+#ifdef Sharing
+	m_pSharing = new float* [m_numPopulation];
+	m_pFitnessSharing = new float[m_numPopulation];
+	for (int i = 0; i < m_numPopulation; i++) {
+		m_pSharing[i] = new float[m_numPopulation];
+	}
+#endif
 	for (int i = 0; i < m_numPopulation; i++) {
 		m_pPopulation[i]->Generate();
 		m_pPopulation[i]->Update();
@@ -63,6 +74,20 @@ HexaGonPopulation::~HexaGonPopulation()
 		delete[]m_pPopulation;
 		m_pPopulation = NULL;
 	}
+#ifdef Sharing
+	if (m_pSharing) {
+		for (int i = 0; i < m_numPopulation; i++) {
+			delete[]m_pSharing[i];
+		}
+		delete[]m_pSharing;
+		m_pSharing = NULL;
+	}
+	if (m_pFitnessSharing) {
+		delete[]m_pFitnessSharing;
+		m_pFitnessSharing = NULL;
+	}
+#endif
+
     if(m_pStart){
         delete []m_pStart;
         m_pStart = NULL;
@@ -108,7 +133,7 @@ void HexaGonPopulation::MakeLookupTable(int numPoint, int* val1, int* val2, int 
 	
 }
 
-void HexaGonPopulation::Crossover(HexaGonNew* p1, HexaGonNew* p2, HexaGonNew* new1, HexaGonNew* new2)
+void HexaGonPopulation::Crossover(HexaGon* p1, HexaGon* p2, HexaGon* new1, HexaGon* new2)
 {
 	//int numPoint = (int)(rand() % MAX_POINT) + 1;
 	std::uniform_int_distribution<int> dist(0, MAX_POINT - 1);
@@ -206,7 +231,7 @@ void HexaGonPopulation::Crossover(HexaGonNew* p1, HexaGonNew* p2, HexaGonNew* ne
 
 }
 
-void HexaGonPopulation::CrossoverRandomPoint(HexaGonNew* p1, HexaGonNew* p2, HexaGonNew* new1, HexaGonNew* new2)
+void HexaGonPopulation::CrossoverRandomPoint(HexaGon* p1, HexaGon* p2, HexaGon* new1, HexaGon* new2)
 {
 	int temp;
 	std::uniform_int_distribution<int> dist(0, m_numElement - 1);
@@ -263,7 +288,7 @@ void HexaGonPopulation::CrossoverRandomPoint(HexaGonNew* p1, HexaGonNew* p2, Hex
 }
 void HexaGonPopulation::Sorting()
 {
-	HexaGonNew* temp;
+	HexaGon* temp;
 	for (int i = 0; i < m_numPopulation; i++) {
 		for (int j = i + 1; j < m_numPopulation; j++) {
 			if (m_pPopulation[i]->GetFitness() > m_pPopulation[j]->GetFitness()) {
@@ -284,6 +309,22 @@ void HexaGonPopulation::ComputeFitnessOrder()
 		m_sumFitness += m_pFitness[i];
 	}
 }
+#ifdef Sharing
+
+void HexaGonPopulation::SharingFitness()
+{
+	m_sumFitness = 0;
+	for (int i = 0; i < m_numPopulation; i++) {
+		m_pFitnessSharing[i] = 0.0;
+		for (int j = 0; j < m_numPopulation; j++) {
+			m_pFitnessSharing[i] += m_pSharing[i][j];
+		}
+		m_pFitnessSharing[i] = (float)m_pFitness[i] / m_pFitnessSharing[i];
+		m_sumFitness += (int)m_pFitnessSharing[i];
+	}
+}
+#endif
+
 float HexaGonPopulation::GetFitness()
 {
 	return m_pPopulation[0]->GetFitness();
@@ -296,12 +337,16 @@ int HexaGonPopulation::GetSelect()
 	int point = dist(gen);
 	int sum = 0;
 	for (int i = 0; i < m_numPopulation; i++) {
+#ifdef Sharing
+		sum += (int)m_pFitnessSharing[i];
+#else
 		sum += m_pFitness[i];
+#endif
 		if (point < sum) return i;
 	}
 	return m_numPopulation - 1;
 }
-int HexaGonPopulation::Similarity(HexaGonNew* c1, HexaGonNew* c2)
+int HexaGonPopulation::Similarity(HexaGon* c1, HexaGon* c2)
 {
 	int sum = 0;
 	int* val1 = c1->GetValue();
@@ -315,7 +360,7 @@ int HexaGonPopulation::Similarity(HexaGonNew* c1, HexaGonNew* c2)
 	return sum;
 }
 
-int HexaGonPopulation::GetSimilarityIdx(HexaGonNew* c)
+int HexaGonPopulation::GetSimilarityIdx(HexaGon* c)
 {
 	int minSimilairty = Similarity(m_pPopulation[0], c);
 	int minIdx = 0;
@@ -329,7 +374,7 @@ int HexaGonPopulation::GetSimilarityIdx(HexaGonNew* c)
 	}
 	return minIdx;
 }
-void HexaGonPopulation::Replacement(HexaGonNew* c)
+void HexaGonPopulation::Replacement(HexaGon* c)
 {
 	int id = GetSimilarityIdx(c);
 	/*if (c->GetFitness() > m_pPopulation[id]->GetFitness()) {
@@ -385,8 +430,9 @@ void HexaGonPopulation::Replacement(HexaGonNew* c)
 			m_pPopulation[0]->Update();
 		}
 	}
+
 }
-void HexaGonPopulation::Mutate(HexaGonNew* c)
+void HexaGonPopulation::Mutate(HexaGon* c)
 {
 	int *val = c->GetValue();
 	int id1;
@@ -409,6 +455,24 @@ void HexaGonPopulation::Mutate(HexaGonNew* c)
 
 void HexaGonPopulation::MakeChoromosome()
 {
+#ifdef Sharing
+	m_maxSimilarity = 0;
+	for (int i = 0; i < m_numPopulation; i++) {
+		for (int j = 0; j < m_numPopulation; j++) {
+			m_pSharing[i][j] = (float)Similarity(m_pPopulation[i], m_pPopulation[j]);
+			if (m_pSharing[i][j] > m_maxSimilarity) {
+				m_maxSimilarity = m_pSharing[i][j];
+			}
+		}
+	}
+	for (int i = 0; i < m_numPopulation; i++) {
+		for (int j = 0; j < m_numPopulation; j++) {
+			m_pSharing[i][j] = 1.0 - (m_pSharing[i][j] / m_maxSimilarity) * (m_pSharing[i][j] / m_maxSimilarity);
+		}
+	}
+	SharingFitness();
+#endif
+
 	int p1 = GetSelect();
 	int p2 = GetSelect();
 	//CrossoverRandomPoint(m_pPopulation[p1], m_pPopulation[p2], m_pPopulationTemp[0], m_pPopulationTemp[1]);
@@ -419,31 +483,11 @@ void HexaGonPopulation::MakeChoromosome()
 
 	Replacement(m_pPopulationTemp[0]);
 	Replacement(m_pPopulationTemp[1]);
-	
 }
 
-void HexaGonPopulation::FullCrossover(int topK)
-{
-	int p1;
-	int p2;
-	
-	for (int i = 0; i < m_numPopulation; i += 2) {
-		p1 = GetSelect();
-		p2 = GetSelect();
-		CrossoverRandomPoint(m_pPopulation[p1], m_pPopulation[p2], m_pPopulationTemp[i], m_pPopulationTemp[i + 1]);
-	}
-	for (int i = 0; i < m_numPopulation; i++) {
-		m_pPopulation[i]->Generate(m_pPopulationTemp[i]->GetValue());
-		m_pPopulation[i]->Update();
-	}
-	
-	Sorting();
-	
-}
 
 void HexaGonPopulation::PrintFittest()
 {
-	Sorting();
 	m_pPopulation[0]->PrintFullHexa();
 	for (int i = 0; i < m_pPopulation[0]->GetRow(); i++) {
 		for (int j = 0; j < m_pPopulation[0]->GetRow(); j++) {

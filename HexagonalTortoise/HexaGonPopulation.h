@@ -1,6 +1,8 @@
 #pragma once
 
-class HexaGonNew;
+//#define Sharing
+
+class HexaGon;
 
 class HexaGonPopulation
 {
@@ -17,29 +19,35 @@ private:
 	bool* m_pCrossover;
 	int* m_pFitness;
 	int  m_sumFitness;
-    HexaGonNew** m_pPopulation;
-	HexaGonNew** m_pPopulationTemp;
+	HexaGon** m_pPopulation;
+	HexaGon** m_pPopulationTemp;
+#ifdef Sharing
+	float* m_pFitnessSharing;
+	float** m_pSharing;
+	float   m_maxSimilarity;
+#endif
 	int m_numPopulation;
 	int m_numElement;
 	int m_next;
 
-	void Crossover(HexaGonNew* p1, HexaGonNew* p2, HexaGonNew* new1, HexaGonNew* new2);
-	void CrossoverRandomPoint(HexaGonNew* p1, HexaGonNew* p2, HexaGonNew* new1, HexaGonNew* new2);
-	void Mutate(HexaGonNew* c);
-	void Replacement(HexaGonNew* c);
+	void Crossover(HexaGon* p1, HexaGon* p2, HexaGon* new1, HexaGon* new2);
+	void CrossoverRandomPoint(HexaGon* p1, HexaGon* p2, HexaGon* new1, HexaGon* new2);
+	void Mutate(HexaGon* c);
+	void Replacement(HexaGon* c);
 	void MakeLookupTable(int numPoint, int* val1, int* val2, int* newVal1, int *newVal2);
-	int Similarity(HexaGonNew* c1, HexaGonNew* c2);
-	int GetSimilarityIdx(HexaGonNew* c);
+	int Similarity(HexaGon* c1, HexaGon* c2);
+	int GetSimilarityIdx(HexaGon* c);
 	int GetSelect();
 	void ComputeFitnessOrder();
 	void Sorting();
-
+#ifdef Sharing
+	void SharingFitness();
+#endif
 public:
 	HexaGonPopulation();
 	HexaGonPopulation(int numPopulation, int row);
 	~HexaGonPopulation();
 	void MakeChoromosome();
-	void FullCrossover(int topK);
 	float GetFitness();
 	void PrintFitness(int topK);
 	void PrintFittest();
